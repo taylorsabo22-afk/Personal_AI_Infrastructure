@@ -147,6 +147,18 @@ async function readExistingConfig(): Promise<ExistingConfig> {
 }
 
 // =============================================================================
+// PLATFORM DETECTION
+// =============================================================================
+
+function detectPlatform(): { isAndroid: boolean; isTermux: boolean; platform: string } {
+  const isAndroid = process.platform === 'linux' && existsSync('/system/bin/app_process');
+  const isTermux = existsSync('/data/data/com.termux');
+  const platform = isAndroid ? 'android' : process.platform;
+  
+  return { isAndroid, isTermux, platform };
+}
+
+// =============================================================================
 // AI SYSTEM DETECTION
 // =============================================================================
 
@@ -547,6 +559,8 @@ Generated: ${new Date().toISOString().split("T")[0]}
 
 async function main() {
   const modeLabel = isUpdateMode ? "UPDATE MODE" : "v1.3.0";
+  const platformInfo = detectPlatform();
+  
   console.log(`
 ╔═══════════════════════════════════════════════════════════════════╗
 ║                                                                   ║
@@ -561,6 +575,24 @@ async function main() {
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
   `);
+
+  // Show platform-specific message
+  if (platformInfo.isAndroid || platformInfo.isTermux) {
+    console.log(`
+╔═══════════════════════════════════════════════════════════════════╗
+║  🤖 ANDROID DETECTED                                              ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+Running on Android/Termux. This installation will:
+  ✓ Use Termux-compatible paths
+  ✓ Configure for Android environment
+  ✓ Skip desktop-only features
+
+Note: Some packs may have limited functionality on Android.
+See PLATFORM.md for Android-specific configuration.
+
+`);
+  }
 
   try {
     // Step 1: Detect AI systems and create backup

@@ -13,7 +13,273 @@ This document tracks all platform-specific code and dependencies across PAI, pro
 |----------|--------|-------|
 | **macOS** | ✅ Fully Supported | Primary development platform |
 | **Linux** | ✅ Fully Supported | Ubuntu/Debian tested, other distros via community |
+| **Android** | ⚡ Supported via Termux | See Android Installation Guide below |
 | **Windows** | ❌ Not Supported | Community contributions welcome |
+
+---
+
+## Android Installation Guide
+
+### Prerequisites
+
+PAI can run on Android devices using **Termux**, a powerful terminal emulator that provides a Linux environment on Android.
+
+**Requirements:**
+- Android device (phone or tablet) running Android 7.0 or higher
+- At least 2GB of free storage
+- Stable internet connection for installation
+
+### Step 1: Install Termux
+
+1. **Download Termux** from F-Droid (recommended) or GitHub:
+   - **F-Droid:** https://f-droid.org/packages/com.termux/
+   - **GitHub:** https://github.com/termux/termux-app/releases
+
+   ⚠️ **Do NOT use the Google Play Store version** - it's outdated and incompatible.
+
+2. **Install Termux:API** (optional, for extended functionality):
+   - Download from F-Droid: https://f-droid.org/packages/com.termux.api/
+
+### Step 2: Set Up Termux Environment
+
+Open Termux and run these commands:
+
+```bash
+# Update package repositories
+pkg update && pkg upgrade -y
+
+# Install essential packages
+pkg install -y git curl wget termux-api
+
+# Grant storage access (important for file operations)
+termux-setup-storage
+```
+
+When prompted, grant Termux storage permissions. This creates a `~/storage` directory linking to your Android device storage.
+
+### Step 3: Install Bun Runtime
+
+PAI uses Bun as its primary runtime. Install it in Termux:
+
+```bash
+# Install Bun
+curl -fsSL https://bun.sh/install | bash
+
+# Add Bun to PATH (add to ~/.bashrc for persistence)
+echo 'export PATH="$HOME/.bun/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify installation
+bun --version
+```
+
+### Step 4: Install PAI
+
+```bash
+# Clone the PAI repository
+cd ~
+git clone https://github.com/danielmiessler/PAI.git
+cd PAI
+
+# Run the Kai Bundle installer
+cd Bundles/Kai
+bun run install.ts
+```
+
+Follow the installation wizard prompts. The installer will:
+- Detect Termux/Android environment automatically
+- Create the `~/.claude` directory structure
+- Configure environment variables
+- Set up PAI with Android-compatible defaults
+
+### Step 5: Install Packs
+
+Install individual packs by giving the pack files to your AI or following the manual installation instructions in each pack.
+
+**Recommended for Android:**
+- `kai-core-install` - Core PAI functionality
+- `kai-history-system` - Context tracking (works well on Android)
+- `kai-hook-system` - Event capture system
+
+**Not recommended for Android:**
+- `kai-voice-system` - Audio playback has limitations on Android
+- `kai-observability-server` - Web server; consider external access issues
+
+### Android-Specific Configuration
+
+#### Environment Variables
+
+Termux uses a standard Linux environment. Add PAI environment variables to `~/.bashrc`:
+
+```bash
+# Edit your bashrc
+nano ~/.bashrc
+
+# Add these lines:
+export DA="YourAIName"
+export TIME_ZONE="America/New_York"  # Your timezone
+export PAI_DIR="$HOME/.claude"
+export PAI_SOURCE_APP="$DA"
+```
+
+#### Storage Paths
+
+On Android/Termux:
+- **PAI installation:** `~/.claude` (in Termux's home directory)
+- **Shared storage access:** `~/storage/` (links to Android filesystem)
+- **External storage:** `~/storage/shared/` (accessible by other apps)
+
+#### Notifications
+
+Android notifications require the Termux:API add-on:
+
+```bash
+# Install termux-api package
+pkg install termux-api
+
+# Test notification
+termux-notification --title "PAI" --content "Setup complete!"
+```
+
+To enable PAI notifications, the voice and observability packs will automatically detect Termux and use `termux-notification` instead of `notify-send`.
+
+### Android Limitations and Workarounds
+
+#### Audio Playback
+
+**Issue:** The `kai-voice-system` pack uses `afplay` (macOS) or `mpg123` (Linux), which may not work perfectly on Android.
+
+**Workaround:**
+```bash
+# Install mpg123 for audio playback
+pkg install mpg123
+
+# Or use termux-media-player
+pkg install termux-api
+# Use termux-media-player command for playback
+```
+
+#### Background Execution
+
+**Issue:** Android may kill background processes to save battery.
+
+**Workaround:**
+1. Disable battery optimization for Termux in Android settings
+2. Use `termux-wake-lock acquire` to prevent system from sleeping:
+   ```bash
+   termux-wake-lock acquire
+   # Run your PAI commands
+   termux-wake-lock release
+   ```
+
+#### Process Management
+
+**Issue:** Some desktop tools assume systemd or launchd.
+
+**Workaround:**
+- Use `nohup` and `&` for background processes
+- Consider using `tmux` or `screen` for persistent sessions:
+  ```bash
+  pkg install tmux
+  tmux new -s pai
+  # Your PAI commands here
+  # Detach with Ctrl+B, then D
+  ```
+
+#### File Editors
+
+Install a text editor for configuration files:
+
+```bash
+# Choose your preferred editor
+pkg install vim
+# or
+pkg install nano
+# or  
+pkg install micro
+```
+
+### Testing Your Installation
+
+Verify PAI is working on Android:
+
+```bash
+# Check environment
+echo $DA
+echo $PAI_DIR
+ls -la ~/.claude
+
+# Test Bun runtime
+cd ~/.claude
+bun --version
+
+# If you installed kai-history-system
+ls -la ~/.claude/history
+```
+
+### Accessing Your AI on Android
+
+Since PAI is designed to work with AI coding assistants, you have several options on Android:
+
+1. **Use a terminal-based AI interface:**
+   - Install and configure Claude CLI, OpenAI CLI, or similar tools in Termux
+   
+2. **Access via SSH:**
+   - Install `openssh` in Termux: `pkg install openssh`
+   - Connect from your desktop to your Android device
+   - Use PAI on Android, control from desktop
+
+3. **Use web-based AI interfaces:**
+   - Run the observability server on Android
+   - Access via mobile browser
+   
+4. **Sync with desktop:**
+   - Use git to sync PAI configuration between devices
+   - Keep `~/.claude` directory synced with cloud storage
+
+### Troubleshooting Android Installation
+
+**Package installation fails:**
+```bash
+# Update repositories
+pkg update
+pkg upgrade
+# Try installing again
+```
+
+**Bun installation fails:**
+```bash
+# Try manual installation
+wget https://github.com/oven-sh/bun/releases/latest/download/bun-linux-aarch64.zip
+unzip bun-linux-aarch64.zip
+mv bun-linux-aarch64/bun ~/.local/bin/
+chmod +x ~/.local/bin/bun
+```
+
+**Permission denied errors:**
+```bash
+# Ensure storage is set up
+termux-setup-storage
+# Check permissions
+ls -la ~/storage
+```
+
+**Command not found errors:**
+```bash
+# Reload shell configuration
+source ~/.bashrc
+# Or restart Termux
+exit
+# Open Termux again
+```
+
+### Android Best Practices
+
+1. **Keep Termux updated:** Run `pkg upgrade` regularly
+2. **Use external storage carefully:** Android has strict storage permissions
+3. **Save battery:** Use wake-lock only when needed
+4. **Backup your config:** Sync `~/.claude/.env` to cloud storage
+5. **Use tmux:** Keep PAI sessions running when switching apps
 
 ---
 

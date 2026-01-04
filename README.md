@@ -26,7 +26,7 @@
 
 **Packs & Bundles:** [Browse Packs](#-available-packs) · [Browse Bundles](#-available-bundles) · [How Packs Work](#-how-pai-packs-work) · [v1 → v2 Journey](#the-journey-pai-v1x--v20)
 
-**Development:** [Create a Pack](#-for-pack-developers) · [Platform Support](#️-platform-compatibility) · [Contributing](#-contributing)
+**Development:** [Create a Pack](#-for-pack-developers) · [Platform Support](#️-platform-compatibility) · [Android Setup](ANDROID.md) · [Contributing](#-contributing)
 
 **Resources:** [FAQ](#-faq) · [Documentation](#-documentation) · [Community](#-community) · [Roadmap](#-roadmap) · [Updates](#-update-history)
 
@@ -339,6 +339,37 @@ Packs are self-contained markdown files. You can:
 
 **No forced structure. No mandatory setup. Take what's useful, leave the rest.**
 
+### 🤖 Android Installation
+
+PAI works on Android devices via Termux! Quick setup:
+
+```bash
+# 1. Install Termux from F-Droid (not Google Play)
+# https://f-droid.org/packages/com.termux/
+
+# 2. Set up environment
+pkg update && pkg upgrade -y
+pkg install -y git curl
+termux-setup-storage
+
+# 3. Install Bun
+curl -fsSL https://bun.sh/install | bash
+echo 'export PATH="$HOME/.bun/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# 4. Install PAI
+git clone https://github.com/danielmiessler/PAI.git
+cd PAI/Bundles/Kai
+bun run install.ts
+```
+
+**See [ANDROID.md](ANDROID.md) for the complete Android setup guide**, including:
+- Termux configuration
+- Android-specific features
+- Troubleshooting
+- Performance tips
+- Using PAI with AI on mobile
+
 ---
 
 ## 📂 Understanding PAI_DIR
@@ -486,7 +517,7 @@ pack:
   license: MIT
   requires:
     - Other-Pack >= 1.0.0 (optional dependencies)
-  platforms: [macos, linux, windows]
+  platforms: [macos, linux, android, windows]
   dependencies:
     tools: [bun, ImageMagick]
     api_keys: [REPLICATE_API_TOKEN]
@@ -574,6 +605,8 @@ Open a PR with:
 
 PAI packs are designed to be **platform-agnostic**:
 
+### AI Systems
+
 | Platform | Status | Notes |
 |----------|--------|-------|
 | **Claude Code** | ✅ Full support | Native integration, all features work |
@@ -582,7 +615,18 @@ PAI packs are designed to be **platform-agnostic**:
 | **Gemini Code / Codex** | 🔄 Testing | Should work with minor tweaks |
 | **Manual use** | ✅ Always works | Packs are documentation + code |
 
+### Operating Systems
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| **macOS** | ✅ Full support | Primary development platform |
+| **Linux** | ✅ Full support | Ubuntu/Debian tested, other distros via community |
+| **Android** | ⚡ Supported via Termux | See [ANDROID.md](ANDROID.md) for setup guide |
+| **Windows** | 🔄 Testing | Community contributions welcome |
+
 The code itself is platform-independent (TypeScript, Python, Bash). Integration points (skills, hooks) may vary by platform.
+
+**Android users:** PAI runs on Android using Termux, a terminal emulator that provides a Linux environment. See the [complete Android setup guide](ANDROID.md) for installation instructions, limitations, and best practices.
 
 ---
 
@@ -639,6 +683,8 @@ If a pack becomes unmaintained, the community can fork and maintain a new versio
 |----------|-------------|
 | [PACKS.md](PACKS.md) | Complete pack system documentation |
 | [Bundles/](Bundles/) | Bundle system documentation and available bundles |
+| [ANDROID.md](ANDROID.md) | Android installation and setup guide (via Termux) |
+| [PLATFORM.md](PLATFORM.md) | Platform compatibility and OS-specific configuration |
 | [SECURITY.md](SECURITY.md) | Security policies and best practices |
 
 ---
