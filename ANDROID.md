@@ -229,16 +229,32 @@ tmux new -s pai
 
 ### Bun installation fails
 
-Try manual installation:
+Try manual installation. First, check your device architecture:
 
 ```bash
-# For ARM64 (most modern Android devices)
+# Check your device architecture
+uname -m
+# Output will be: aarch64 (ARM64) or x86_64 (Intel/AMD)
+```
+
+Then download the appropriate version:
+
+```bash
+# For ARM64 (most modern Android devices - aarch64)
 wget https://github.com/oven-sh/bun/releases/latest/download/bun-linux-aarch64.zip
 unzip bun-linux-aarch64.zip
 mkdir -p ~/.local/bin
 mv bun-linux-aarch64/bun ~/.local/bin/
 chmod +x ~/.local/bin/bun
 export PATH="$HOME/.local/bin:$PATH"
+
+# For x86_64 (Intel/AMD Android devices)
+# wget https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64.zip
+# unzip bun-linux-x64.zip
+# mkdir -p ~/.local/bin
+# mv bun-linux-x64/bun ~/.local/bin/
+# chmod +x ~/.local/bin/bun
+# export PATH="$HOME/.local/bin:$PATH"
 ```
 
 ---

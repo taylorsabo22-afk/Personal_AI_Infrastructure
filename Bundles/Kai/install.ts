@@ -151,9 +151,22 @@ async function readExistingConfig(): Promise<ExistingConfig> {
 // =============================================================================
 
 function detectPlatform(): { isAndroid: boolean; isTermux: boolean; platform: string } {
-  const isAndroid = process.platform === 'linux' && existsSync('/system/bin/app_process');
-  const isTermux = existsSync('/data/data/com.termux');
-  const platform = isAndroid ? 'android' : process.platform;
+  let isAndroid = false;
+  let isTermux = false;
+  
+  try {
+    isAndroid = process.platform === 'linux' && existsSync('/system/bin/app_process');
+  } catch {
+    // Permission denied or file check failed
+  }
+  
+  try {
+    isTermux = existsSync('/data/data/com.termux');
+  } catch {
+    // Permission denied or file check failed
+  }
+  
+  const platform = (isAndroid || isTermux) ? 'android' : process.platform;
   
   return { isAndroid, isTermux, platform };
 }

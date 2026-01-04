@@ -249,11 +249,20 @@ pkg upgrade
 
 **Bun installation fails:**
 ```bash
-# Try manual installation
+# Check your architecture first
+uname -m
+# Output: aarch64 (ARM64) or x86_64 (Intel/AMD)
+
+# For ARM64 (most Android devices)
 wget https://github.com/oven-sh/bun/releases/latest/download/bun-linux-aarch64.zip
 unzip bun-linux-aarch64.zip
+mkdir -p ~/.local/bin
 mv bun-linux-aarch64/bun ~/.local/bin/
 chmod +x ~/.local/bin/bun
+export PATH="$HOME/.local/bin:$PATH"
+
+# For x86_64 devices, use:
+# wget https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64.zip
 ```
 
 **Permission denied errors:**
